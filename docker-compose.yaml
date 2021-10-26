@@ -1,0 +1,32 @@
+version: '3'
+
+services:
+  app:
+    build: .
+    entrypoint: wait-for db:27017 -t 40 -- ./.docker/entrypoint.sh
+    restart: always
+    tty: true
+    volumes:
+      - .:/home/node/app
+    ports:
+      - 3000:3000
+    depends_on:
+      - db
+
+  db:
+    image: mongo:4.4.5
+    restart: always
+    tty: true
+    volumes:
+      - .docker/dbdata:/data/db
+    environment:
+      - MONGO_INITDB_DATABASE=app
+
+  mongoexpress:
+    image: mongo-express:0.54.0
+    restart: always
+    ports:
+      - 8081:8081
+    environment:
+      ME_CONFIG_MONGODB_SERVER: db
+    tty: true
